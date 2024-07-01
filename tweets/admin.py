@@ -7,6 +7,7 @@ class TweetAdmin(admin.ModelAdmin):
     list_display = (
         "payload",
         "user",
+        "number_of_likes",
         "created_at",
     )
     list_filter = ("created_at",)
