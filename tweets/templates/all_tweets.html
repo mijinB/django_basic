@@ -1,0 +1,9 @@
+<h1>Tweets:</h1>
+<ul>
+  {% for tweet in tweets %}
+  <li>
+    <p>{{ tweet.user }}💭"{{ tweet.payload }}"</p>
+    <span>❤️{{ tweet.number_of_likes }}</span>
+   </li>
+  {% endfor %}
+</ul>
