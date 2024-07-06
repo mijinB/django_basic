@@ -1,19 +1,11 @@
-from rest_framework.decorators import api_view
 from rest_framework.response import Response
-from .models import Tweet
+from rest_framework.views import APIView
 from .serializers import TweetSerializer
+from .models import Tweet
 
 
-@api_view()
-def tweets(request):
-    tweets = Tweet.objects.all()
-    serializer = TweetSerializer(
-        tweets,
-        many=True,
-    )
-    return Response(
-        {
-            "ok": True,
-            "tweets": serializer.data,
-        }
-    )
+class Tweets(APIView):
+    def get(self, request):
+        tweets = Tweet.objects.all()
+        serializer = TweetSerializer(tweets, many=True)
+        return Response(serializer.data)
