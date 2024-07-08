@@ -35,3 +35,16 @@ class TweetDetail(APIView):
         tweet = self.get_object(pk)
         serializer = TweetSerializer(tweet)
         return Response(serializer.data)
+
+    def put(self, request, pk):
+        tweet = self.get_object(pk)
+        serializer = TweetSerializer(
+            tweet,
+            request.data,
+        )
+        if serializer.is_valid():
+            updated_tweet = serializer.save()
+            serializer = TweetSerializer(updated_tweet)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
