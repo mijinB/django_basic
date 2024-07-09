@@ -7,11 +7,14 @@ from tweets.serializers import TweetSerializer
 
 
 class UserTweets(APIView):
-    def get(self, request, pk):
+    def get_object(self, pk):
         try:
-            user = User.objects.get(pk=pk)
+            return User.objects.get(pk=pk)
         except User.DoesNotExist:
             raise NotFound
+
+    def get(self, request, pk):
+        user = self.get_object(pk)
         tweets = Tweet.objects.filter(user=user)
         serializer = TweetSerializer(tweets, many=True)
         return Response(serializer.data)
