@@ -9,6 +9,8 @@ class UserSerializer(serializers.ModelSerializer):
             "pk",
             "username",
             "email",
+            "date_joined",
+            "name",
         )
 
 

@@ -1,7 +1,7 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import NotFound
+from rest_framework.exceptions import NotFound, ParseError
 from .models import User
 from .serializers import UserSerializer, UserDetailSeializer
 from tweets.models import Tweet
@@ -13,6 +13,20 @@ class Users(APIView):
         users = User.objects.all()
         serializer = UserSerializer(users, many=True)
         return Response(serializer.data)
+
+    def post(self, request):
+        password = request.data.get("password")
+        if not password:
+            raise ParseError
+        serializer = UserSerializer(data=request.data)
+        if serializer.is_valid():
+            user = serializer.save()
+            user.set_password(password)
+            user.save()
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        else:
+            return Response(serializer.errors)
 
 
 class UserDetail(APIView):
