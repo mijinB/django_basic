@@ -1,13 +1,14 @@
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.exceptions import NotFound, NotAuthenticated
+from rest_framework.status import HTTP_400_BAD_REQUEST, HTTP_200_OK
 from rest_framework.permissions import IsAuthenticatedOrReadOnly
-from rest_framework.exceptions import NotFound
-from rest_framework.status import HTTP_204_NO_CONTENT
 from .serializers import TweetSerializer
 from .models import Tweet
 
 
 class Tweets(APIView):
+
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get(self, request):
@@ -21,9 +22,15 @@ class Tweets(APIView):
             tweet = serializer.save(user=request.user)
             serializer = TweetSerializer(tweet)
             return Response(serializer.data)
+        else:
+            return Response(
+                serializer.errors,
+                status=HTTP_400_BAD_REQUEST,
+            )
 
 
 class TweetDetail(APIView):
+
     permission_classes = [IsAuthenticatedOrReadOnly]
 
     def get_object(self, pk):
@@ -39,18 +46,22 @@ class TweetDetail(APIView):
 
     def put(self, request, pk):
         tweet = self.get_object(pk)
-        serializer = TweetSerializer(
-            tweet,
-            request.data,
-        )
+        if tweet.user != request.user:
+            raise NotAuthenticated
+        serializer = TweetSerializer(tweet, data=request.data)
         if serializer.is_valid():
-            updated_tweet = serializer.save()
-            serializer = TweetSerializer(updated_tweet)
+            tweet = serializer.save()
+            serializer = TweetSerializer(tweet)
             return Response(serializer.data)
         else:
-            return Response(serializer.errors)
+            return Response(
+                serializer.errors,
+                status=HTTP_400_BAD_REQUEST,
+            )
 
     def delete(self, request, pk):
         tweet = self.get_object(pk)
+        if tweet.user != request.user:
+            raise NotAuthenticated
         tweet.delete()
-        return Response(status=HTTP_204_NO_CONTENT)
+        return Response(status=HTTP_200_OK, )
